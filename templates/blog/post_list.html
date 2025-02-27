@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Posts</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 36px;
+            color: #333;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Button to add new post */
+        .add-post-btn {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-post-btn:hover {
+            background-color: #45a049;
+        }
+
+        .post {
+            background-color: #ffffff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .post:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .post h2 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .post p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .post small {
+            font-size: 14px;
+            color: #777;
+        }
+
+        .post .read-more {
+            display: inline-block;
+            margin-top: 10px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .post .read-more:hover {
+            background-color: #45a049;
+        }
+
+        .delete-button {
+            display: inline-block;
+            margin-top: 10px;
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
+
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            margin: 0 5px;
+            text-decoration: none;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .pagination a:hover {
+            background-color: #45a049;
+        }
+
+        .pagination .current {
+            background-color: #45a049;
+        }
+
+        .search-bar {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .search-bar input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .search-bar button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .search-bar button:hover {
+            background-color: #45a049;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .post {
+                padding: 15px;
+            }
+
+            .post h2 {
+                font-size: 24px;
+            }
+
+            .post p {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Blog Posts</h1>
+
+        <!-- Add Post Button -->
+        <a href="{% url 'add_post' %}" class="add-post-btn">Add New Post</a>
+
+        <!-- Search Form -->
+        <div class="search-bar">
+            <form method="GET" action="">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Search posts..." />
+                <button type="submit">Search</button>
+            </form>
+        </div>
+
+        <!-- Display Posts -->
+        {% for post in posts %}
+            <div class="post">
+                <h2>{{ post.title }}</h2>
+                <p>{{ post.content }}</p>
+                <p><small>Published on: {{ post.published_date }}</small></p>
+                <a href="#" class="read-more">Read More</a>
+
+                <!-- Delete Form -->
+                <form method="POST" action="{% url 'delete_post' post.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="delete-button">Delete</button>
+                </form>
+                <hr>
+            </div>
+        {% empty %}
+            <p>No posts found.</p>
+        {% endfor %}
+
+        <!-- Pagination -->
+        <div class="pagination">
+            <span class="current">{{ page_obj.number }}</span> of {{ page_obj.paginator.num_pages }}
+            {% if page_obj.has_previous %}
+                <a href="?page=1&search={{ search_query }}">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}">Previous</a>
+            {% endif %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}&search={{ search_query }}">Last</a>
+            {% endif %}
+        </div>
+
+    </div>
+
+</body>
+</html>
